@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐅 Spring Boot — Полный Гайд от Тигра</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #0d1117;
+            color: #c9d1d9;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.7;
+        }
+        h1 {
+            color: #f0c040;
+            font-size: 2.2em;
+            margin: 20px 0 10px;
+            border-bottom: 2px solid #30363d;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #7ee787;
+            margin: 35px 0 15px;
+            border-left: 4px solid #7ee787;
+            padding-left: 15px;
+        }
+        h3 {
+            color: #79c0ff;
+            margin: 20px 0 10px;
+        }
+        code {
+            background: #161b22;
+            padding: 3px 8px;
+            border-radius: 5px;
+            color: #ff7b72;
+            font-family: 'JetBrains Mono', 'Fira Code', monospace;
+            font-size: 0.9em;
+            border: 1px solid #30363d;
+        }
+        pre {
+            background: #161b22;
+            padding: 20px;
+            border-radius: 10px;
+            overflow-x: auto;
+            margin: 15px 0;
+            border: 1px solid #30363d;
+            color: #c9d1d9;
+        }
+        pre code { background: none; padding: 0; border: none; color: #c9d1d9; }
+        .topic-highlight {
+            background: #1c2128;
+            border-left: 4px solid #f0c040;
+            padding: 15px 20px;
+            border-radius: 0 8px 8px 0;
+            margin: 20px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: #161b22;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #30363d;
+        }
+        th, td {
+            border: 1px solid #30363d;
+            padding: 12px 16px;
+            text-align: left;
+        }
+        th {
+            background: #21262d;
+            color: #f0c040;
+            font-weight: 600;
+        }
+        tr:hover td { background: #1c2128; }
+        .nav {
+            background: #161b22;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #30363d;
+        }
+        .nav a {
+            color: #58a6ff;
+            margin-right: 20px;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .nav a:hover { text-decoration: underline; }
+        .highlight { color: #f0c040; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="nav">
+        🐅 <strong>Tiger API Docs</strong> &nbsp;|&nbsp;
+        <a href="#start">Старт</a>
+        <a href="#db">База Данных</a>
+        <a href="#endpoints">Эндпоинты</a>
+        <a href="#cookies">Куки</a>
+        <a href="#tokens">Токены</a>
+        <a href="#html">HTML</a>
+    </div>
+
+    <!-- ВВЕДЕНИЕ -->
+    <h1 id="start">🐅 Spring Boot — Полный Гайд от Тигра</h1>
+    <div class="topic-highlight">
+        <p>Spring Boot — это фреймворк для создания веб-приложений на Java. Он позволяет поднять сервер за минуты и сосредоточиться на бизнес-логике, а не на настройке.</p>
+    </div>
+
+    <h2>📦 Установка и первый запуск</h2>
+    <p>1. Установи <strong>JDK 21</strong> (или 17).</p>
+    <p>2. Установи <strong>VS Code</strong> и расширение <code>Spring Boot Extension Pack</code>.</p>
+    <p>3. Создай проект через <code>Ctrl+Shift+P</code> → <code>Spring Initializr: Create a Gradle Project</code>.</p>
+    <p>4. Добавь зависимости <code>Spring Web</code>, <code>Spring Data JPA</code>, <code>H2 Database</code>.</p>
+    <p>5. Запусти: <code>gradle bootRun</code>.</p>
+
+    <h2>📁 Структура проекта</h2>
+    <pre>demo/
+├── build.gradle               ← зависимости и плагины
+├── src/
+│   └── main/
+│       ├── java/com/example/demo/
+│       │   ├── DemoApplication.java  ← точка входа (main)
+│       │   ├── controllers/          ← обработчики HTTP-запросов
+│       │   ├── models/               ← сущности (Entity)
+│       │   ├── repositories/         ← работа с БД
+│       │   └── services/             ← бизнес-логика
+│       └── resources/
+│           ├── static/               ← HTML, CSS, JS, картинки
+│           └── application.properties ← настройки</pre>
+
+    <!-- БАЗА ДАННЫХ -->
+    <h1 id="db">🗄️ База Данных (Spring Data JPA + H2)</h1>
+    
+    <h2>build.gradle (зависимости)</h2>
+    <pre><code>implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+implementation 'com.h2database:h2'  // база в памяти для разработки
+// для продакшена:
+// implementation 'org.postgresql:postgresql'</code></pre>
+
+    <h2>application.properties</h2>
+    <pre><code># H2 Database (база в памяти)
+spring.datasource.url=jdbc:h2:mem:testdb
+spring.datasource.driverClassName=org.h2.Driver
+spring.datasource.username=sa
+spring.datasource.password=
+spring.h2.console.enabled=true
+spring.jpa.hibernate.ddl-auto=update</code></pre>
+
+    <h2>Модель (Entity) — аналог структуры в Go</h2>
+    <pre><code>@Entity
+@Table(name = "users")
+public class User {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(nullable = false)
+    private int age;
+
+    @Column(unique = true)
+    private String email;
+
+    // Пустой конструктор (обязателен для JPA!)
+    public User() {}
+
+    // Конструктор с параметрами
+    public User(String name, int age, String email) {
+        this.name = name;
+        this.age = age;
+        this.email = email;
+    }
+
+    // Геттеры и сеттеры (генерируются через Alt+Insert в IDEA)
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public int getAge() { return age; }
+    public void setAge(int age) { this.age = age; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+}</code></pre>
+
+    <h2>Репозиторий — аналог GORM</h2>
+    <p>Spring Data JPA позволяет создавать методы запросов просто по их имени. <strong>Тебе не нужно писать SQL!</strong></p>
+    <pre><code>public interface UserRepository extends JpaRepository&lt;User, Long&gt; {
+
+    // Найти всех пользователей с таким именем
+    List&lt;User&gt; findByName(String name);
+
+    // Найти пользователя по email
+    User findByEmail(String email);
+
+    // Найти всех пользователей старше указанного возраста
+    List&lt;User&gt; findByAgeGreaterThan(int age);
+
+    // Найти по имени и возрасту
+    List&lt;User&gt; findByNameAndAge(String name, int age);
+}</code></pre>
+
+    <h2>Сервисный слой (правильная архитектура)</h2>
+    <pre><code>@Service
+public class UserService {
+
+    @Autowired
+    private UserRepository userRepository;
+
+    public List&lt;User&gt; getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    public User getUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
+    }
+
+    public User createUser(User user) {
+        return userRepository.save(user);
+    }
+
+    public void deleteUser(Long id) {
+        userRepository.deleteById(id);
+    }
+}</code></pre>
+
+    <!-- ЭНДПОИНТЫ -->
+    <h1 id="endpoints">🌐 Эндпоинты (REST API)</h1>
+
+    <h2>Полный REST-контроллер с CRUD</h2>
+    <pre><code>@RestController
+@RequestMapping("/api/v1/users")
+public class UserController {
+
+    @Autowired
+    private UserService userService;
+
+    // GET /api/v1/users — получить всех
+    @GetMapping
+    public ResponseEntity&lt;List&lt;User&gt;&gt; getAll() {
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    // GET /api/v1/users/1 — получить одного
+    @GetMapping("/{id}")
+    public ResponseEntity&lt;User&gt; getOne(@PathVariable Long id) {
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    // POST /api/v1/users — создать
+    @PostMapping
+    public ResponseEntity&lt;User&gt; create(@RequestBody User user) {
+        return ResponseEntity.status(201).body(userService.createUser(user));
+    }
+
+    // PUT /api/v1/users/1 — обновить
+    @PutMapping("/{id}")
+    public ResponseEntity&lt;User&gt; update(@PathVariable Long id, @RequestBody User user) {
+        user.setId(id);
+        return ResponseEntity.ok(userService.createUser(user));
+    }
+
+    // DELETE /api/v1/users/1 — удалить
+    @DeleteMapping("/{id}")
+    public ResponseEntity&lt;Void&gt; delete(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // GET /api/v1/users/search?name=Тигр — поиск по параметру
+    @GetMapping("/search")
+    public ResponseEntity&lt;List&lt;User&gt;&gt; search(@RequestParam String name) {
+        return ResponseEntity.ok(userRepository.findByName(name));
+    }
+}</code></pre>
+
+    <h2>Шпаргалка по HTTP-методам и аннотациям</h2>
+    <table>
+        <tr><th>Метод</th><th>Аннотация</th><th>Что делает</th><th>Пример URL</th></tr>
+        <tr><td>GET</td><td><code>@GetMapping</code></td><td>Получить данные</td><td><code>/api/v1/users</code></td></tr>
+        <tr><td>GET</td><td><code>@GetMapping("/{id}")</code></td><td>Получить по ID</td><td><code>/api/v1/users/5</code></td></tr>
+        <tr><td>POST</td><td><code>@PostMapping</code></td><td>Создать</td><td><code>/api/v1/users</code></td></tr>
+        <tr><td>PUT</td><td><code>@PutMapping("/{id}")</code></td><td>Обновить</td><td><code>/api/v1/users/5</code></td></tr>
+        <tr><td>DELETE</td><td><code>@DeleteMapping("/{id}")</code></td><td>Удалить</td><td><code>/api/v1/users/5</code></td></tr>
+    </table>
+
+    <h2>Дополнительные аннотации</h2>
+    <table>
+        <tr><th>Аннотация</th><th>Что делает</th><th>Пример</th></tr>
+        <tr><td><code>@PathVariable</code></td><td>Берёт значение из URL</td><td><code>/users/{id}</code> → <code>@PathVariable Long id</code></td></tr>
+        <tr><td><code>@RequestParam</code></td><td>Берёт значение из query-строки</td><td><code>/search?name=Тигр</code> → <code>@RequestParam String name</code></td></tr>
+        <tr><td><code>@RequestBody</code></td><td>Берёт JSON из тела запроса</td><td><code>@RequestBody User user</code></td></tr>
+        <tr><td><code>@Autowired</code></td><td>Автоматически внедряет зависимость</td><td><code>@Autowired private UserService service;</code></td></tr>
+        <tr><td><code>@Service</code></td><td>Помечает класс как сервис (бизнес-логика)</td><td><code>@Service public class UserService {}</code></td></tr>
+        <tr><td><code>@Entity</code></td><td>Помечает класс как таблицу в БД</td><td><code>@Entity public class User {}</code></td></tr>
+    </table>
+
+    <!-- КУКИ -->
+    <h1 id="cookies">🍪 Куки (Cookies)</h1>
+    
+    <h2>Установка куки</h2>
+    <pre><code>@GetMapping("/set-cookie")
+public String setCookie(HttpServletResponse response) {
+    Cookie cookie = new Cookie("username", "Tiger");
+    cookie.setMaxAge(3600);       // время жизни в секундах (1 час)
+    cookie.setHttpOnly(true);     // JavaScript не может прочитать
+    cookie.setSecure(true);       // только по HTTPS (для продакшена)
+    cookie.setPath("/");          // доступна на всём сайте
+    response.addCookie(cookie);
+    return "Кука установлена!";
+}</code></pre>
+
+    <h2>Чтение куки</h2>
+    <pre><code>// Способ 1: через аннотацию @CookieValue
+@GetMapping("/get-cookie")
+public String getCookie(@CookieValue(value = "username", defaultValue = "гость") String username) {
+    return "Привет, " + username + "!";
+}
+
+// Способ 2: через HttpServletRequest (можно прочитать все куки)
+@GetMapping("/all-cookies")
+public String getAllCookies(HttpServletRequest request) {
+    Cookie[] cookies = request.getCookies();
+    StringBuilder sb = new StringBuilder();
+    for (Cookie cookie : cookies) {
+        sb.append(cookie.getName()).append(" = ").append(cookie.getValue()).append("; ");
+    }
+    return sb.toString();
+}</code></pre>
+
+    <h2>Удаление куки</h2>
+    <pre><code>@GetMapping("/delete-cookie")
+public String deleteCookie(HttpServletResponse response) {
+    Cookie cookie = new Cookie("username", null);
+    cookie.setMaxAge(0);          // 0 = удалить немедленно
+    cookie.setPath("/");
+    response.addCookie(cookie);
+    return "Кука удалена!";
+}</code></pre>
+
+    <!-- ТОКЕНЫ -->
+    <h1 id="tokens">🔑 JWT Токены</h1>
+
+    <h2>build.gradle (зависимость)</h2>
+    <pre><code>implementation 'io.jsonwebtoken:jjwt-api:0.12.5'
+runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.12.5'
+runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.5'</code></pre>
+
+    <h2>Утилитный класс для работы с JWT</h2>
+    <pre><code>@Component
+public class JwtUtil {
+
+    // Секретный ключ (в реальном проекте — в application.properties!)
+    private final SecretKey secretKey = Keys.hmacShaKeyFor(
+        "мой-супер-секретный-ключ-длиной-256-бит!!".getBytes()
+    );
+
+    // Генерация токена
+    public String generateToken(String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 3600000)) // 1 час
+                .signWith(secretKey)
+                .compact();
+    }
+
+    // Извлечение имени пользователя из токена
+    public String getUsernameFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    // Проверка валидности токена
+    public boolean isTokenValid(String token) {
+        try {
+            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // Извлечение всех claims (данных) из токена
+    public Claims getAllClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+    }
+}</code></pre>
+
+    <h2>Middleware для проверки токена (аналог Gin Middleware)</h2>
+    <pre><code>@Component
+public class JwtFilter extends OncePerRequestFilter {
+
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain chain)
+            throws ServletException, IOException {
+
+        String authHeader = request.getHeader("Authorization");
+
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            if (jwtUtil.isTokenValid(token)) {
+                String username = jwtUtil.getUsernameFromToken(token);
+                // Здесь можно загрузить пользователя из БД и положить в SecurityContext
+                System.out.println("Авторизован: " + username);
+            }
+        }
+
+        chain.doFilter(request, response);
+    }
+}</code></pre>
+
+    <!-- ВОЗВРАТ HTML -->
+    <h1 id="html">📄 Как возвращать HTML</h1>
+
+    <h2>Способ 1: Статические файлы (самый простой)</h2>
+    <p>Просто положи файл в <code>src/main/resources/static/</code>. Spring Boot автоматически отдаст его по прямому пути.</p>
+    <pre>src/main/resources/static/index.html → http://localhost:8080/index.html
+src/main/resources/static/css/style.css → http://localhost:8080/css/style.css
+src/main/resources/static/js/script.js → http://localhost:8080/js/script.js</pre>
+
+    <h2>Способ 2: @Controller (возвращает имя файла)</h2>
+    <pre><code>@Controller  // ← НЕ @RestController!
+public class HomeController {
+
+    @GetMapping("/")
+    public String home() {
+        return "index.html";  // ищет в static/
+    }
+
+    @GetMapping("/about")
+    public String about() {
+        return "about.html";
+    }
+}</code></pre>
+
+    <h2>Способ 3: Редирект (через @RestController)</h2>
+    <pre><code>@RestController
+public class HomeController {
+
+    @GetMapping("/home")
+    public String home() {
+        return "redirect:/index.html";
+    }
+}</code></pre>
+
+    <h2>Способ 4: ModelAndView с шаблонизатором Thymeleaf</h2>
+    <pre><code>// Добавь в build.gradle:
+// implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+@Controller
+public class HomeController {
+
+    @GetMapping("/greet")
+    public ModelAndView greet() {
+        ModelAndView mav = new ModelAndView("greet"); // greet.html в templates/
+        mav.addObject("name", "Тигр");
+        mav.addObject("age", 14);
+        return mav;
+    }
+}</code></pre>
+    <pre><code>&lt;!-- templates/greet.html --&gt;
+&lt;!DOCTYPE html&gt;
+&lt;html xmlns:th="http://www.thymeleaf.org"&gt;
+&lt;body&gt;
+    &lt;h1&gt;Привет, &lt;span th:text="${name}"&gt;&lt;/span&gt;!&lt;/h1&gt;
+    &lt;p&gt;Тебе &lt;span th:text="${age}"&gt;&lt;/span&gt; лет.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+    <!-- ЗАКЛЮЧЕНИЕ -->
+    <h2>🎯 Что дальше?</h2>
+    <div class="topic-highlight">
+        <p>Теперь ты знаешь базу Spring Boot: <strong>контроллеры, базу данных, куки, токены и возврат HTML</strong>. Это ровно то, что нужно для создания полноценного веб-приложения.</p>
+        <p>Дальше можно углубляться в темы: Spring Security, микросервисы, Docker, деплой на сервер.</p>
+        <p style="margin-top: 10px;">🐅 <strong>Тигр, ты готов. Вперёд!</strong></p>
+    </div>
+
+</body>
+</html>
